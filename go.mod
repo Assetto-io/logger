@@ -1,4 +1,4 @@
-module github.com/Assetto-io/logger
+module github.com/assetto-io/logger
 
 go 1.15
 
