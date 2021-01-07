@@ -5,6 +5,12 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var (
+	DebugLvl = "debug"
+	InfoLvl = "info"
+	ErrorLvl = "error"
+)
+
 type Logger struct {
 	log *zap.Logger
 }
@@ -77,10 +83,12 @@ func setLevel(lvl string) zapcore.Level {
 	}
 
 	switch lvl {
-	case "debug":
+	case DebugLvl:
 		return zap.DebugLevel
-	case "info":
+	case InfoLvl:
 		return zap.InfoLevel
+	case ErrorLevel:
+		return zap.ErrorLevel
 	default:
 		return zap.InfoLevel
 	}
