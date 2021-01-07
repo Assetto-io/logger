@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var (
+const (
 	DebugLvl = "debug"
 	InfoLvl = "info"
 	ErrorLvl = "error"
@@ -87,7 +87,7 @@ func setLevel(lvl string) zapcore.Level {
 		return zap.DebugLevel
 	case InfoLvl:
 		return zap.InfoLevel
-	case ErrorLevel:
+	case ErrorLvl:
 		return zap.ErrorLevel
 	default:
 		return zap.InfoLevel
