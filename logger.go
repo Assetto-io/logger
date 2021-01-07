@@ -14,7 +14,7 @@ type LogField struct {
 	Value interface{}
 }
 
-func New(lvl string) *Logger {
+func New(name string, lvl string) *Logger {
 	logConfig := zap.Config{
 		OutputPaths: []string{"stdout"},
 		Encoding:    "json",
@@ -23,6 +23,7 @@ func New(lvl string) *Logger {
 			MessageKey:   "msg",
 			LevelKey:     "level",
 			TimeKey:      "time",
+			NameKey:      "id",
 			EncodeTime:   zapcore.ISO8601TimeEncoder,
 			EncodeLevel:  zapcore.LowercaseLevelEncoder,
 			EncodeCaller: zapcore.ShortCallerEncoder,
@@ -32,7 +33,7 @@ func New(lvl string) *Logger {
 	if err != nil {
 		panic(err)
 	}
-	return &Logger{log: log}
+	return &Logger{log: log.Named(name)}
 }
 
 func (l *Logger)Debug(msg string, tags ...LogField) {
