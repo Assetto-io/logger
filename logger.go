@@ -5,15 +5,20 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var (
+type Logger struct {
 	log *zap.Logger
-)
+}
 
-func init() {
+type LogField struct {
+	Key string
+	Value interface{}
+}
+
+func New(lvl string) *Logger {
 	logConfig := zap.Config{
 		OutputPaths: []string{"stdout"},
 		Encoding:    "json",
-		Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
+		Level:       zap.NewAtomicLevelAt(setLevel(lvl)),
 		EncoderConfig: zapcore.EncoderConfig{
 			MessageKey:   "msg",
 			LevelKey:     "level",
@@ -23,33 +28,59 @@ func init() {
 			EncodeCaller: zapcore.ShortCallerEncoder,
 		},
 	}
-	var err error
-	log, err = logConfig.Build()
+	log, err := logConfig.Build()
 	if err != nil {
 		panic(err)
 	}
+	return &Logger{log: log}
 }
 
-func GetLog() *zap.Logger {
-	return log
+func (l *Logger)Debug(msg string, tags ...LogField) {
+	l.log.Debug(msg, toZapField(tags)...)
+	l.log.Sync()
 }
 
-func Field(key string, value interface{}) zap.Field {
-	return zap.Any(key, value)
+func (l *Logger)Info(msg string, tags ...LogField) {
+	l.log.Info(msg, toZapField(tags)...)
+	l.log.Sync()
 }
 
-func Debug(msg string, tags ...zap.Field) {
-	log.Debug(msg, tags...)
-	log.Sync()
+func (l *Logger)Error(msg string, err error, tags ...LogField) {
+	zapTags := toZapField(tags)
+	zapTags = append(zapTags, zap.NamedError("error", err))
+	l.log.Error(msg, zapTags...)
+	l.log.Sync()
 }
 
-func Info(msg string, tags ...zap.Field) {
-	log.Info(msg, tags...)
-	log.Sync()
+// ======================== Helper Functions ========================
+
+func Field(key string, value interface{}) LogField {
+	return LogField{Key: key, Value: value}
 }
 
-func Error(msg string, err error, tags ...zap.Field) {
-	tags = append(tags, zap.NamedError("error", err))
-	log.Error(msg, tags...)
-	log.Sync()
+func toZapField(field []LogField) []zap.Field {
+	l := len(field)
+	if l == 0 {
+		return nil
+	}
+	r := make([]zap.Field, l, l)
+	for i, f := range field {
+		r[i] = zap.Any(f.Key, f.Value)
+	}
+	return r
+}
+
+func setLevel(lvl string) zapcore.Level {
+	if len(lvl) == 0 {
+		return zap.InfoLevel
+	}
+
+	switch lvl {
+	case "debug":
+		return zap.DebugLevel
+	case "info":
+		return zap.InfoLevel
+	default:
+		return zap.InfoLevel
+	}
 }
