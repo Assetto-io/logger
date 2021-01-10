@@ -23,7 +23,7 @@ type LogField struct {
 	Value interface{}
 }
 
-func New(name string, lvl string) *Logger {
+func New(name string, lvl string) (*Logger, error) {
 	logConfig := zap.Config{
 		OutputPaths: []string{"stdout"},
 		Encoding:    "json",
@@ -40,9 +40,9 @@ func New(name string, lvl string) *Logger {
 	}
 	log, err := logConfig.Build()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return &Logger{log: log.Named(name)}
+	return &Logger{log: log.Named(name)}, nil
 }
 
 func (l *Logger) Debug(msg string, tags ...LogField) {

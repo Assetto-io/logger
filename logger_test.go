@@ -6,9 +6,9 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	got := New("test_service", "info")
-	if got == nil {
-		t.Errorf("Logger is %v; wanted: smth else", got)
+	l, err := New("test_service", "info")
+	if err != nil {
+		t.Errorf("Logger is %v; wanted: smth else", l)
 	}
 }
 
@@ -24,7 +24,10 @@ func TestField(t *testing.T) {
 }
 
 func TestLogger_Info(t *testing.T) {
-	l := New("test_service", "debug")
+	l, err := New("test_service", "debug")
+	if err != nil {
+		t.Errorf("Logger is %v; wanted: smth else", l)
+	}
 	l.Info("some logs", Field("data", 5))
 	l.Debug("some logs", Field("data", 5))
 	l.Error("some logs", errors.New("Some custom error"), Field("data", 5))
