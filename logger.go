@@ -26,7 +26,7 @@ type LogField struct {
 func New(name string, lvl string) (*Logger, error) {
 	logConfig := zap.Config{
 		OutputPaths: []string{"stdout"},
-		Encoding:    "json",
+		Encoding:    setEncoding(lvl),
 		Level:       zap.NewAtomicLevelAt(setLevel(lvl)),
 		EncoderConfig: zapcore.EncoderConfig{
 			MessageKey:   "msg",
@@ -34,7 +34,7 @@ func New(name string, lvl string) (*Logger, error) {
 			TimeKey:      "time",
 			NameKey:      "id",
 			EncodeTime:   zapcore.ISO8601TimeEncoder,
-			EncodeLevel:  zapcore.LowercaseLevelEncoder,
+			EncodeLevel:  setEncodeLvl(lvl),
 			EncodeCaller: zapcore.ShortCallerEncoder,
 		},
 	}
@@ -124,4 +124,18 @@ func setLevel(lvl string) zapcore.Level {
 	default:
 		return zap.InfoLevel
 	}
+}
+
+func setEncoding(lvl string) string {
+	if lvl != DebugLvl {
+		return "json"
+	}
+	return "console"
+}
+
+func setEncodeLvl(lvl string) func(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+	if lvl != DebugLvl {
+		return zapcore.LowercaseLevelEncoder
+	}
+	return zapcore.CapitalColorLevelEncoder
 }
